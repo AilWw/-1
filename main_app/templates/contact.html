@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}اتصل بنا - مكتب خدمات{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">اتصل بنا</h1>
+
+    <div class="row">
+        <div class="col-lg-6">
+            {% if success %}
+            <div class="alert alert-success">تم استقبال رسالتك بنجاح. سنتواصل معك قريباً.</div>
+            {% endif %}
+
+            <form method="post" class="card p-4">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">الاسم</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">رقم الهاتف</label>
+                    <input type="tel" name="phone" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">الخدمة المطلوبة</label>
+                    <input type="text" name="service" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">الرسالة</label>
+                    <textarea name="message" class="form-control" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-100">إرسال</button>
+            </form>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-phone"></i> الهاتف</h5>
+                    <p><a href="tel:0552900896">0552900896</a></p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-envelope"></i> البريد الإلكتروني</h5>
+                    <p><a href="mailto:info@servisoffice.com">info@servisoffice.com</a></p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fab fa-whatsapp"></i> واتس أب</h5>
+                    <p><a href="https://wa.me/966552900896" target="_blank">تواصل عبر الواتس أب</a></p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> العنوان</h5>
+                    <p>الرياض، المملكة العربية السعودية</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

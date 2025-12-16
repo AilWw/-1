@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}الرئيسية - مكتب خدمات{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <section class="hero-section py-5 mb-5" style="background: linear-gradient(135deg, #22c55e 0%, #1e40af 100%); color: white; border-radius: 10px;">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">مكتب خدمات</h1>
+                <p class="lead mb-4">انجاز سريع لخدمات الأفراد والمؤسسات في جميع أنحاء المملكة</p>
+                <a href="{% url 'services' %}" class="btn btn-light btn-lg me-2">استعرض الخدمات</a>
+                <a href="{% url 'contact' %}" class="btn btn-outline-light btn-lg">اتصل بنا</a>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-briefcase" style="font-size: 100px; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section mb-5">
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-rocket" style="font-size: 40px; color: #22c55e; margin-bottom: 15px;"></i>
+                        <h5 class="card-title">سرعة الإنجاز</h5>
+                        <p class="card-text">نقدم خدمات بسرعة فائقة وكفاءة عالية</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt" style="font-size: 40px; color: #1e40af; margin-bottom: 15px;"></i>
+                        <h5 class="card-title">الأمان والسرية</h5>
+                        <p class="card-text">حماية كاملة لبيانات ومعلومات عملائنا</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-users" style="font-size: 40px; color: #f59e0b; margin-bottom: 15px;"></i>
+                        <h5 class="card-title">فريق محترف</h5>
+                        <p class="card-text">فريق متخصص وذو خبرة عالية في المجال</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-headset" style="font-size: 40px; color: #ef4444; margin-bottom: 15px;"></i>
+                        <h5 class="card-title">دعم 24/7</h5>
+                        <p class="card-text">خدمة عملاء متاحة طوال الوقت</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section mb-5">
+        <h2 class="text-center mb-4">خدماتنا المميزة</h2>
+        <div class="row">
+            {% for service in services %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        {% if service.discount_price %}
+                        <span class="badge-discount position-absolute top-0 end-0 m-2">خصم</span>
+                        {% endif %}
+                        <h5 class="card-title">{{ service.name }}</h5>
+                        <p class="card-text text-muted">{{ service.description|truncatewords:15 }}</p>
+                        <div class="mb-3">
+                            {% if service.discount_price %}
+                            <span class="text-muted text-decoration-line-through">{{ service.price }} ريال</span>
+                            <span class="h5 text-danger">{{ service.discount_price }} ريال</span>
+                            {% else %}
+                            <span class="h5 text-success">{{ service.price }} ريال</span>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'service_detail' service.id %}" class="btn btn-primary btn-sm w-100 mb-2">التفاصيل</a>
+                        <form method="post" action="{% url 'add_to_cart' service.id %}" class="d-inline w-100">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-shopping-cart"></i> أضف للسلة
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">لا توجد خدمات متاحة حالياً</div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'services' %}" class="btn btn-primary btn-lg">عرض جميع الخدمات</a>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section mb-5" style="background-color: #f3f4f6; padding: 40px 0; border-radius: 10px;">
+        <div class="container">
+            <h2 class="text-center mb-4">شهادات عملائنا</h2>
+            <div class="row">
+                {% for testimonial in testimonials %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="mb-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= testimonial.rating %}
+                                    <i class="fas fa-star" style="color: #fbbf24;"></i>
+                                    {% else %}
+                                    <i class="far fa-star" style="color: #d1d5db;"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <p class="card-text">{{ testimonial.message }}</p>
+                            <p class="card-text"><strong>{{ testimonial.name }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section mb-5">
+        <h2 class="text-center mb-4">أسئلة شائعة</h2>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="accordion" id="faqAccordion">
+                    {% for faq in faqs %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ faq.id }}">
+                                {{ faq.question }}
+                            </button>
+                        </h2>
+                        <div id="faq{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {{ faq.answer }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section py-5" style="background: linear-gradient(135deg, #22c55e 0%, #1e40af 100%); color: white; border-radius: 10px; text-align: center;">
+        <h2 class="mb-3">هل تريد طلب خدمة؟</h2>
+        <p class="lead mb-4">تواصل معنا الآن عبر الواتس أب أو الهاتف</p>
+        <a href="https://wa.me/966552900896" target="_blank" class="btn btn-light btn-lg me-2">
+            <i class="fab fa-whatsapp"></i> واتس أب
+        </a>
+        <a href="tel:0552900896" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-phone"></i> اتصل بنا
+        </a>
+    </section>
+</div>
+{% endblock %}

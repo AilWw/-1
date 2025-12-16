@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}السلة - مكتب خدمات{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4"><i class="fas fa-shopping-cart"></i> سلة الخدمات</h1>
+
+    {% if items %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>الخدمة</th>
+                                <th>السعر</th>
+                                <th>الكمية</th>
+                                <th>الإجمالي</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cart-items">
+                            {% for item in items %}
+                            <tr data-service-id="{{ item.service.id }}">
+                                <td>
+                                    <strong>{{ item.service.name }}</strong><br>
+                                    <small class="text-muted">{{ item.service.category }}</small>
+                                </td>
+                                <td>{{ item.price }} ريال</td>
+                                <td>
+                                    <input type="number" value="{{ item.quantity }}" min="1" max="10" class="form-control quantity-input" style="width: 60px;">
+                                </td>
+                                <td class="subtotal">{{ item.subtotal }} ريال</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger remove-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">ملخص الطلب</h5>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>عدد الخدمات:</span>
+                        <strong id="cart-count-summary">{{ items|length }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>الإجمالي:</span>
+                        <h4 class="text-success" id="cart-total">{{ total }} ريال</h4>
+                    </div>
+                    <hr>
+                    <button id="checkout-btn" class="btn btn-primary btn-lg w-100 mb-2">
+                        <i class="fas fa-credit-card"></i> إكمال الدفع
+                    </button>
+                    <a href="{% url 'services' %}" class="btn btn-outline-primary btn-lg w-100">
+                        <i class="fas fa-shopping-bag"></i> متابعة التسوق
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <i class="fas fa-shopping-cart" style="font-size: 50px; margin-bottom: 20px; display: block; color: #3b82f6;"></i>
+        <h4>السلة فارغة</h4>
+        <p class="mb-3">لم تقم بإضافة أي خدمات إلى السلة حتى الآن</p>
+        <a href="{% url 'services' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-shopping-bag"></i> استعرض الخدمات
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+
+// تحديث الكمية
+document.querySelectorAll('.quantity-input').forEach(input => {
+    input.addEventListener('change', function(){
+        const tr = this.closest('tr');
+        const serviceId = tr.getAttribute('data-service-id');
+        const quantity = this.value;
+
+        fetch(`/update-cart/${serviceId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({quantity: quantity})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success){
+                location.reload(); // لإعادة حساب الإجمالي بعد تغيير الكمية
+            }
+        });
+    });
+});
+
+// حذف عنصر
+document.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', function(){
+        const tr = this.closest('tr');
+        const serviceId = tr.getAttribute('data-service-id');
+
+        fetch(`/remove-from-cart/${serviceId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success){
+                tr.remove();
+                document.getElementById('cart-count-summary').textContent = data.cart_count;
+                location.reload(); // لإعادة حساب الإجمالي بعد الحذف
+            }
+        });
+    });
+});
+
+// إكمال الدفع
+document.getElementById('checkout-btn').addEventListener('click', function(){
+    fetch('/checkout/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success){
+            alert('تم تأكيد الطلب بنجاح!');
+            window.location.reload();
+        }
+    });
+});
+</script>
+{% endblock %}

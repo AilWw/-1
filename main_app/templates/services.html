@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}الخدمات - مكتب خدمات{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">الخدمات</h1>
+
+    <div class="row mb-4">
+        <!-- الشريط الجانبي للبحث والتصفية -->
+        <div class="col-md-3">
+            <form method="get" class="card p-3">
+                <h5 class="mb-3">البحث والتصفية</h5>
+                <div class="mb-3">
+                    <label class="form-label">البحث</label>
+                    <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="ابحث عن خدمة...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">الفئة</label>
+                    <select name="category" class="form-select">
+                        <option value="">جميع الفئات</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">بحث</button>
+            </form>
+        </div>
+
+        <!-- قائمة الخدمات -->
+        <div class="col-md-9">
+            <div class="row">
+                {% for service in services %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body position-relative">
+                            {% if service.discount_price %}
+                            <span class="badge-discount position-absolute top-0 end-0 m-2">خصم</span>
+                            {% endif %}
+                            <h5 class="card-title">{{ service.name }}</h5>
+                            <p class="card-text text-muted">{{ service.description|truncatewords:15 }}</p>
+                            <p class="text-muted small">الفئة: {{ service.category }}</p>
+                            <div class="mb-3">
+                                {% if service.discount_price %}
+                                <span class="text-muted text-decoration-line-through">{{ service.price }} ريال</span>
+                                <span class="h5 text-danger">{{ service.discount_price }} ريال</span>
+                                {% else %}
+                                <span class="h5 text-success">{{ service.price }} ريال</span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'service_detail' service.id %}" class="btn btn-primary btn-sm w-100 mb-2">التفاصيل</a>
+                            
+                            <!-- زر إضافة للسلة -->
+                            <button class="btn btn-outline-primary btn-sm w-100 add-to-cart-btn" 
+                                    data-service-id="{{ service.id }}">
+                                <i class="fas fa-shopping-cart"></i> أضف للسلة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center">لم يتم العثور على خدمات</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+
+// إضافة للسلة باستخدام AJAX
+document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    btn.addEventListener('click', function(){
+        const serviceId = this.dataset.serviceId;
+
+        fetch(`/add-to-cart/${serviceId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({quantity: 1})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success){
+                // تحديث عداد السلة في navbar
+                document.getElementById('cart-count').textContent = data.cart_count;
+                alert('تمت إضافة الخدمة إلى السلة!');
+            } else {
+                alert('حدث خطأ أثناء الإضافة.');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ service.name }} - مكتب خدمات{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- معلومات الخدمة -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="card-title mb-3">{{ service.name }}</h1>
+                    <p class="text-muted">الفئة: <strong>{{ service.category }}</strong></p>
+                    <hr>
+                    <h5>الوصف</h5>
+                    <p>{{ service.description }}</p>
+                    <hr>
+                    <h5>السعر</h5>
+                    {% if service.discount_price %}
+                    <p>
+                        <span class="text-muted text-decoration-line-through">{{ service.price }} ريال</span>
+                        <span class="h4 text-danger">{{ service.discount_price }} ريال</span>
+                    </p>
+                    {% else %}
+                    <p><span class="h4 text-success">{{ service.price }} ريال</span></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- إضافة للسلة بدون form -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">الكمية</label>
+                        <input type="number" id="quantity" value="1" min="1" max="10" class="form-control">
+                    </div>
+                    <button id="add-to-cart-btn" class="btn btn-primary btn-lg w-100 mb-2">
+                        <i class="fas fa-shopping-cart"></i> أضف للسلة
+                    </button>
+                    <a href="{% url 'services' %}" class="btn btn-outline-primary btn-lg w-100">
+                        العودة للخدمات
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('add-to-cart-btn').addEventListener('click', function(e){
+    e.preventDefault(); // يمنع إعادة تحميل الصفحة
+    const quantity = document.getElementById('quantity').value;
+
+    fetch("{% url 'add_to_cart' service.id %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({quantity: quantity})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success){
+            document.getElementById('cart-count').textContent = data.cart_count;
+            // خيار التنبيه، يمكن تغييره إلى إشعار جميل بدلاً من alert
+            alert('تمت إضافة الخدمة إلى السلة');
+        } else {
+            alert('حدث خطأ. حاول مرة أخرى');
+        }
+    });
+});
+</script>
+{% endblock %}
